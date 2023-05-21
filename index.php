@@ -1,25 +1,34 @@
 <?php
+
 try {
-    $bdd = new PDO('mysql:host=localhost;dbname=cloudcomputing;charset=utf8', 'root', '');
-    $bdd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $serverName = "cloudcomputingjean.database.windows.net";
+    $database = "CloudComputing";
+    $uid = "!!!!!!!!@lacatholille.fr"; // Remplacez "votre_uid" par le nom d'utilisateur approprié
+    $pwd = "!!!!!!!!!!!!!!!!"; // Remplacez "votre_mot_de_passe" par le mot de passe approprié
+      $bdd = new PDO("sqlsrv:server=$serverName;Database=$database;Authentication=ActiveDirectoryPassword", $uid, $pwd);
+    $bdd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);  
+
 } catch(Exception $e) {
     die('Erreur : '.$e->getMessage());
+}
+if( $bdd ) {
+     echo "Connection established.<br />";
+}else{
+     echo "Connection could not be established.<br />";
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nom = $_POST['nom'];
     $prenom = $_POST['prenom'];
-
     // Requête d'insertion des données
-    $insertQuery = "INSERT INTO table_nom_prenom (nom, prenom) VALUES (:nom, :prenom)";
+    $insertQuery = "INSERT INTO dbo.table_nom_prenom (id,nom, prenom) VALUES (1,:nom, :prenom)";
     $insertStatement = $bdd->prepare($insertQuery);
     $insertStatement->execute(array(':nom' => $nom, ':prenom' => $prenom));
 }
 
-$query = "SELECT nom, prenom FROM table_nom_prenom";
+$query = "SELECT nom, prenom FROM dbo.table_nom_prenom";
 $result = $bdd->query($query);
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -65,6 +74,7 @@ $result = $bdd->query($query);
         }
     </style>
 </head>
+</head>
 <body>
     <table>
         <tr>
@@ -72,7 +82,8 @@ $result = $bdd->query($query);
             <th>Prénom</th>
         </tr>
         <?php
-        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+
+       while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
             echo "<tr>";
             echo "<td>".$row['nom']."</td>";
             echo "<td>".$row['prenom']."</td>";
